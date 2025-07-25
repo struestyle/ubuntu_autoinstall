@@ -17,17 +17,22 @@ autoinstall:
       - type: disk
         match:
           size: largest
-        wipe: superblock
+        wipe: superblock-recursive  # Efface complètement le disque, y compris les partitions existantes
         id: disk0
       - type: partition
         device: disk0
-        size: -1
-        id: part0
+        size: 1G
+        id: boot-part
+        flag: bios_grub
+      - type: partition
+        device: disk0
+        size: -1  # Utiliser tout l'espace restant
+        id: luks-part
       - type: luks
         id: luks0
         name: luks-root
-        device: part0
-        passphrase: "$6$QB8Sloyhr8wpaaXU$YFLuPyqclPA8UBI2A0coG7z2gjTCbdE5ZOTw51h0guCZLMnudzYbrl/8WFL8FWjICxtELj3Cfv7PFSWTtELoh1"  # Remplace par une passphrase sécurisée
+        device: luks-part
+        passphrase: "tonmotdepasse"  # Remplace par une passphrase sécurisée
       - type: lvm_pv
         id: pv0
         devices: luks0
@@ -39,7 +44,7 @@ autoinstall:
         id: lv0
         name: ubuntu-lv
         vg: vg0
-        size: 100%
+        size: 100%FREE  # Utiliser tout l'espace disponible
       - type: format
         id: format0
         fstype: ext4
@@ -48,6 +53,14 @@ autoinstall:
         id: mount0
         path: /
         device: format0
+      - type: format
+        id: format-boot
+        fstype: ext2
+        volume: boot-part
+      - type: mount
+        id: mount-boot
+        path: /boot
+        device: format-boot
   identity:
     hostname: temporary-hostname
     username: adminasi
