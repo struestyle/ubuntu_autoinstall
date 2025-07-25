@@ -1,0 +1,61 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: fr_FR
+  keyboard:
+    layout: fr
+  network:
+    network:
+      version: 2
+      ethernets:
+        enp0s3:
+          dhcp4: yes
+  storage:
+    layout:
+      name: lvm
+    config:
+      - type: disk
+        match:
+          size: largest
+        wipe: superblock
+        id: disk0
+      - type: partition
+        device: disk0
+        size: -1
+        id: part0
+      - type: luks
+        id: luks0
+        name: luks-root
+        device: part0
+        passphrase: "$6$QB8Sloyhr8wpaaXU$YFLuPyqclPA8UBI2A0coG7z2gjTCbdE5ZOTw51h0guCZLMnudzYbrl/8WFL8FWjICxtELj3Cfv7PFSWTtELoh1"  # Remplace par une passphrase sécurisée
+      - type: lvm_pv
+        id: pv0
+        devices: luks0
+      - type: lvm_vg
+        id: vg0
+        name: ubuntu-vg
+        devices: [pv0]
+      - type: lvm_lv
+        id: lv0
+        name: ubuntu-lv
+        vg: vg0
+        size: 100%
+      - type: format
+        id: format0
+        fstype: ext4
+        volume: lv0
+      - type: mount
+        id: mount0
+        path: /
+        device: format0
+  identity:
+    hostname: temporary-hostname
+    username: adminasi
+    password: "$6$fyH3Xhsc4CX.yRG6$2GQ482yA6nSkdOipE7ckMA5RISlnZl6Zzo9tVjtbJLIZKc8NSxG.cTCuptNYGaAEkqTPGEsgDODF1XqI2J3lz/" 
+  # packages:
+  #   - openssh-server
+  #   - vim
+  late-commands:
+    - SERIAL=$(dmidecode -s system-serial-number | tr -d ' \n') && echo "PC-$SERIAL" > /target/etc/hostname
+    - SERIAL=$(dmidecode -s system-serial-number | tr -d ' \n') && sed -i "s/temporary-hostname/PC-$SERIAL/" /target/etc/hosts
+    # - echo 'Installation terminée !' > /target/installation-complete.txt
