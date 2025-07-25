@@ -32,7 +32,7 @@ autoinstall:
         id: luks0
         name: luks-root
         device: luks-part
-        passphrase: "tonmotdepasse"  # Remplace par une passphrase sécurisée
+        passphrase: "$6$QB8Sloyhr8wpaaXU$YFLuPyqclPA8UBI2A0coG7z2gjTCbdE5ZOTw51h0guCZLMnudzYbrl/8WFL8FWjICxtELj3Cfv7PFSWTtELoh1"  # Remplace par une passphrase sécurisée
       - type: lvm_pv
         id: pv0
         devices: luks0
